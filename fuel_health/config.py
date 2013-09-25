@@ -146,6 +146,12 @@ ComputeGroup = [
     cfg.StrOpt('image_name',
                default="TestVM",
                help="Valid secondary image reference to be used in tests."),
+    cfg.StrOpt('deployment_mode',
+               default="ha",
+               help="Deployments mode"),
+    cfg.StrOpt('deployment_os',
+               default="RHEL",
+               help="Deployments os"),
     cfg.IntOpt('flavor_ref',
                default=42,
                help="Valid primary flavor to use in tests."),
@@ -331,8 +337,6 @@ class FileConfig(object):
         self.identity = cfg.CONF.identity
         self.network = cfg.CONF.network
         self.volume = cfg.CONF.volume
-        os.environ['http_proxy'] = 'http://{0}:{1}'.format(
-            self.compute.controller_nodes[0], 8888)
 
 
 class ConfigGroup(object):
@@ -411,10 +415,10 @@ class NailgunConfig(object):
         response = self.req_session.get(self.nailgun_url + api_url)
         LOG.info('RESPONSE %s STATUS %s' % (api_url, response.status_code))
         data = response.json()
-        controller_nodes = filter(lambda node: node['role'] == 'controller',
+        controller_nodes = filter(lambda node: 'controller' in node['roles'],
                                   data)
-        cinder_nodes = filter(lambda node: node['role'] == 'cinder',
-                                  data)
+        cinder_nodes = filter(lambda node: 'cinder' in node['roles'],
+                              data)
         controller_ips = []
         conntroller_names = []
         public_ips = []
@@ -425,14 +429,14 @@ class NailgunConfig(object):
             public_ips.append(ip)
             controller_ips.append(node['ip'])
             conntroller_names.append(node['fqdn'])
-        LOG.info("NAMES %s IPS %s" % (controller_ips, conntroller_names))
+        LOG.info("IP %s NAMES %s" % (controller_ips, conntroller_names))
         self.compute.public_ips = public_ips
         self.compute.controller_nodes = controller_ips
         if not cinder_nodes:
             self.volume.cinder_node_exist = False
 
-        compute_nodes = filter(lambda node: node['role'] == 'compute',
-                                  data)
+        compute_nodes = filter(lambda node: 'compute' in node['roles'],
+                               data)
         compute_ips = []
         for node in compute_nodes:
             compute_ips.append(node['ip'])
@@ -443,6 +447,8 @@ class NailgunConfig(object):
         api_url = '/api/clusters/%s' % self.cluster_id
         data = self.req_session.get(self.nailgun_url + api_url).json()
         self.mode = data['mode']
+        self.compute.deployment_mode = self.mode
+        self.compute.deployment_os = data['release']['operating_system']
 
     def _parse_networks_configuration(self):
         api_url = '/api/clusters/%s/network_configuration/' % self.cluster_id
@@ -480,4 +486,7 @@ class NailgunConfig(object):
 
 
 def FuelConfig():
-    return NailgunConfig()
+    if 'CUSTOM_FUEL_CONFIG' in os.environ:
+        return FileConfig()
+    else:
+        return NailgunConfig()
