@@ -30,8 +30,7 @@ PECAN_DEFAULT = {
         'port': 8000
     },
     'dbpath': 'postgresql+psycopg2://ostf:ostf@localhost/ostf',
-    'debug': False,
-    'debug_tests': 'fuel_plugin/tests/functional/dummy_tests'
+    'debug': False
 }
 
 

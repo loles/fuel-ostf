@@ -33,8 +33,9 @@ class DiscoveryPlugin(plugins.Plugin):
     name = 'discovery'
     score = 15000
 
-    def __init__(self):
+    def __init__(self, deployment_info):
         self.test_sets = {}
+        self.deployment_info = deployment_info
         super(DiscoveryPlugin, self).__init__()
 
     def options(self, parser, env=os.environ):
@@ -47,13 +48,20 @@ class DiscoveryPlugin(plugins.Plugin):
         module = __import__(module, fromlist=[module])
         LOG.info('Inspecting %s', filename)
         if hasattr(module, '__profile__'):
-            session = engine.get_session()
-            with session.begin(subtransactions=True):
-                LOG.info('%s discovered.', module.__name__)
-                test_set = models.TestSet(**module.__profile__)
-                test_set = session.merge(test_set)
-                session.add(test_set)
-                self.test_sets[test_set.id] = test_set
+            profile = module.__profile__
+
+            if set(__profile__.get('deployment_tags', []))\
+               .issubset(self.deployment_info['deployment_tags']):
+
+                profile['cluster_id'] = self.deployment_info['cluster_id']
+
+                session = engine.get_session()
+                with session.begin(subtransactions=True):
+                    LOG.info('%s discovered.', module.__name__)
+                    test_set = models.TestSet(**profile)
+                    test_set = session.merge(test_set)
+                    session.add(test_set)
+                    self.test_sets[test_set.id] = test_set
 
     def addSuccess(self, test):
         test_id = test.id()
@@ -62,13 +70,17 @@ class DiscoveryPlugin(plugins.Plugin):
                 session = engine.get_session()
                 with session.begin(subtransactions=True):
                     LOG.info('%s added for %s', test_id, test_set_id)
+
                     data = dict()
-                    data['title'], data['description'], data['duration'] = \
+                    (data['title'], data['description'],
+                     data['duration'], data['deployment_tags']) = \
                         nose_utils.get_description(test)
+
                     old_test_obj = session.query(models.Test).filter_by(
                         name=test_id, test_set_id=test_set_id,
                         test_run_id=None).\
                         update(data, synchronize_session=False)
+
                     if not old_test_obj:
                         data.update({'test_set_id': test_set_id,
                                      'name': test_id})
@@ -76,11 +88,12 @@ class DiscoveryPlugin(plugins.Plugin):
                         session.add(test_obj)
 
 
-def discovery(path=CORE_PATH):
+def discovery(deployment_info={}, path=CORE_PATH):
     """Will discover all tests on provided path and save info in db
     """
     LOG.info('Starting discovery for %r.', path)
     nose_test_runner.SilentTestProgram(
         addplugins=[DiscoveryPlugin()],
         exit=False,
-        argv=['tests_discovery', '--collect-only', path] )
+        argv=['tests_discovery', '--collect-only', path]
+    )

@@ -21,7 +21,6 @@ import signal
 from fuel_plugin.ostf_adapter import cli_config
 from fuel_plugin.ostf_adapter import nailgun_hooks
 from fuel_plugin.ostf_adapter import logger
-from fuel_plugin.ostf_adapter.nose_plugin import nose_discovery
 from gevent import pywsgi
 from fuel_plugin.ostf_adapter.wsgi import app
 import pecan
@@ -37,8 +36,7 @@ def main():
             'port': cli_args.port
         },
         'dbpath': cli_args.dbpath,
-        'debug': cli_args.debug,
-        'debug_tests': cli_args.debug_tests
+        'debug': cli_args.debug
     }
 
     logger.setup(log_file=cli_args.log_file)
@@ -49,7 +47,6 @@ def main():
 
     if getattr(cli_args, 'after_init_hook'):
         return nailgun_hooks.after_initialization_environment_hook()
-    nose_discovery.discovery(cli_args.debug_tests)
     host, port = pecan.conf.server.host, pecan.conf.server.port
     srv = pywsgi.WSGIServer((host, int(port)), root)
 

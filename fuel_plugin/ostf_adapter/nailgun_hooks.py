@@ -13,9 +13,9 @@
 #    under the License.
 
 import logging
-from fuel_plugin.ostf_adapter.nose_plugin import nose_discovery
-from fuel_plugin.ostf_adapter.storage import alembic_cli
+import requests
 from pecan import conf
+from fuel_plugin.ostf_adapter.storage import alembic_cli
 
 LOG = logging.getLogger(__name__)
 
@@ -25,5 +25,19 @@ def after_initialization_environment_hook():
     Exception is good enough signal that something goes wrong
     """
     alembic_cli.do_apply_migrations()
-    nose_discovery.discovery(conf.debug_tests)
     return 0
+
+
+def request_to_nailgun(api_url):
+    nailgun_url = 'http://{0}:{1}/{2}'.format(
+        conf.nailgun.host,
+        conf.nailgun.port,
+        api_url
+    )
+
+    req_ses = requests.Session()
+    req_ses.trust_env = False
+
+    response = req_ses.get(nailgun_url)
+
+    return response.json()

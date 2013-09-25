@@ -17,9 +17,11 @@ import logging
 
 from sqlalchemy import func
 from sqlalchemy.orm import joinedload
-
 from pecan import rest, expose, request
+
 from fuel_plugin.ostf_adapter.storage import models
+from fuel_plugin.ostf_adapter.nose_plugin import nose_discovery
+from fuel_plugin.ostf_adapter.nailgun_hooks import request_to_nailgun
 
 
 LOG = logging.getLogger(__name__)
@@ -55,19 +57,40 @@ class TestsController(BaseRestController):
 class TestsetsController(BaseRestController):
 
     @expose('json')
-    def get_one(self, test_set):
+    def get(self, cluster):
+        nailgun_api_url = 'api/clusters/{}'.format(cluster)
+        cluster_meta = request_to_nailgun(nailgun_api_url)
+
+        #at this moment we need following deployment
+        #arguments for cluster. The main inconvinience
+        #is that needed data is spreaded in cluster_meta
+        #dict which leads to such hoodoo
+        cluster_deployment_args = set(
+            [
+                cluster_meta['mode'],
+                cluster_meta['release']['operating_system']
+            ]
+        )
+
         with request.session.begin(subtransactions=True):
-            test_set = request.session.query(models.TestSet)\
-                .filter_by(id=test_set).first()
+            test_sets = request.session.query(TestSet)\
+                .filter_by(cluster_id=cluster)\
+                .first()
+
+            if not test_set:
+                cluster_data = {
+                    'cluster_id': cluster,
+                    'deployment_args': cluster_deployment_args
+                }
+                nose_discovery.discovery(deployment_info=cluster_data)
+
+                test_set = request.session.query(models.TestSet)\
+                    .filter_by(cluster_id=cluster)\
+                    .first()
+
             if test_set and isinstance(test_set, models.TestSet):
                 return test_set.frontend
             return {}
-
-    @expose('json')
-    def get_all(self):
-        with request.session.begin(subtransactions=True):
-            return [item.frontend for item
-                    in request.session.query(models.TestSet).all()]
 
 
 class TestrunsController(BaseRestController):

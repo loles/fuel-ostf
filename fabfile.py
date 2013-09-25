@@ -7,7 +7,10 @@ def createrole(user='ostf', password='ostf'):
 
 
 def createdb(user='ostf', database='ostf'):
-    local('psql -U postgres -c "CREATE DATABASE {0} WITH OWNER={1};"'.format(database, user))
+    local(
+        'psql -U postgres -c "CREATE DATABASE {0} WITH OWNER={1};"'
+        .format(database, user)
+    )
 
 
 def dropdb(database='ostf'):
@@ -33,7 +36,11 @@ def startserver():
 
 
 def createmigration(comment):
-    config_path = 'fuel_plugin/ostf_adapter/storage/migrations/alembic.ini'
+    '''
+    Supply comment for new alembic revision as a value
+    for comment argument
+    '''
+    config_path = 'fuel_plugin/ostf_adapter/storage/alembic.ini'
     local(
         'alembic --config {0} revision --autogenerate -m \"{1}\"'
         .format(config_path, comment)

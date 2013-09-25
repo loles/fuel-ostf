@@ -186,6 +186,7 @@ class TestSet(BASE):
     additional_arguments = sa.Column(fields.ListField())
     cleanup_path = sa.Column(sa.String(128))
     meta = sa.Column(fields.JsonField())
+    cluster_id = sa.Column(sa.Integer)
     deployment_tags = sa.Column(ARRAY(sa.String(64)))
 
     tests = relationship('Test',
