@@ -32,8 +32,16 @@ def startserver():
         '--debug --debug_tests=fuel_plugin/tests/functional/dummy_tests'))
 
 
+def createmigration(comment):
+    config_path = 'fuel_plugin/ostf_adapter/storage/migrations/alembic.ini'
+    local(
+        'alembic --config {0} revision --autogenerate -m \"{1}\"'
+        .format(config_path, comment)
+    )
+
+
 def migrate(database='ostf'):
-    path='postgresql+psycopg2://ostf:ostf@localhost/{0}'.format(database)
+    path = 'postgresql+psycopg2://ostf:ostf@localhost/{0}'.format(database)
     local('ostf-server --after-initialization-environment-hook --dbpath {0}'.format(path))
 
 

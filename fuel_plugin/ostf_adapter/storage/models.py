@@ -18,6 +18,8 @@ import sqlalchemy as sa
 from sqlalchemy import desc
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import joinedload, relationship, object_mapper
+from sqlalchemy.dialects.postgres import ARRAY
+
 from fuel_plugin.ostf_adapter import nose_plugin
 from fuel_plugin.ostf_adapter.storage import fields, engine
 
@@ -184,6 +186,7 @@ class TestSet(BASE):
     additional_arguments = sa.Column(fields.ListField())
     cleanup_path = sa.Column(sa.String(128))
     meta = sa.Column(fields.JsonField())
+    deployment_tags = sa.Column(ARRAY(sa.String(64)))
 
     tests = relationship('Test',
                          backref='test_set', order_by='Test.name')
@@ -221,6 +224,7 @@ class Test(BASE):
     step = sa.Column(sa.Integer())
     time_taken = sa.Column(sa.Float())
     meta = sa.Column(fields.JsonField())
+    deployment_tags = sa.Column(ARRAY(sa.String(64)))
 
     test_set_id = sa.Column(sa.String(128), sa.ForeignKey('test_sets.id'))
     test_run_id = sa.Column(sa.Integer(), sa.ForeignKey('test_runs.id'))
