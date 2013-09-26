@@ -72,6 +72,7 @@ class DiscoveryPlugin(plugins.Plugin):
                     LOG.info('%s added for %s', test_id, test_set_id)
 
                     data = dict()
+                    data['cluster_id'] = self.deployment_info['cluster_id']
                     (data['title'], data['description'],
                      data['duration'], data['deployment_tags']) = \
                         nose_utils.get_description(test)
@@ -93,7 +94,7 @@ def discovery(deployment_info={}, path=CORE_PATH):
     """
     LOG.info('Starting discovery for %r.', path)
     nose_test_runner.SilentTestProgram(
-        addplugins=[DiscoveryPlugin()],
+        addplugins=[DiscoveryPlugin(deployment_info)],
         exit=False,
         argv=['tests_discovery', '--collect-only', path]
     )
