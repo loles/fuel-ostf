@@ -50,7 +50,7 @@ class DiscoveryPlugin(plugins.Plugin):
         if hasattr(module, '__profile__'):
             profile = module.__profile__
 
-            if set(__profile__.get('deployment_tags', []))\
+            if set(profile.get('deployment_tags', []))\
                .issubset(self.deployment_info['deployment_tags']):
 
                 profile['cluster_id'] = self.deployment_info['cluster_id']
@@ -77,15 +77,11 @@ class DiscoveryPlugin(plugins.Plugin):
                      data['duration'], data['deployment_tags']) = \
                         nose_utils.get_description(test)
 
-                    old_test_obj = session.query(models.Test).filter_by(
-                        name=test_id, test_set_id=test_set_id,
-                        test_run_id=None).\
-                        update(data, synchronize_session=False)
+                    if set(data['deployment_tags'])\
+                       .issubset(self.deployment_info['deployment_tags']):
 
-                    if not old_test_obj:
-                        data.update({'test_set_id': test_set_id,
-                                     'name': test_id})
                         test_obj = models.Test(**data)
+                        test_obj = session.merge(test_obj)
                         session.add(test_obj)
 
 
@@ -96,5 +92,5 @@ def discovery(deployment_info={}, path=CORE_PATH):
     nose_test_runner.SilentTestProgram(
         addplugins=[DiscoveryPlugin(deployment_info)],
         exit=False,
-        argv=['tests_discovery', '--collect-only', path]
+        argv=['tests_discovery', '--collect-only', '--nocapture', path]
     )

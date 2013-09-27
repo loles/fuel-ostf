@@ -16,7 +16,8 @@ __profile__ = {
     "id": "stopped_test",
     "driver": "nose",
     "test_path": "fuel_plugin/tests/functional/dummy_tests/stopped_test.py",
-    "description": "Long running 25 secs fake tests"
+    "description": "Long running 25 secs fake tests",
+    "deployment_tags": ["multinode", "ubuntu"]
 }
 
 import time
@@ -28,12 +29,14 @@ class dummy_tests_stopped(unittest.TestCase):
     def test_really_long(self):
         """This is long running tests
            Duration: 25sec
+           Deployment tags: multinode, ubuntu, nova_network
         """
         time.sleep(25)
         self.assertTrue(True)
 
     def test_one_no_so_long(self):
         """What i am doing here? You ask me????
+        Deployment tags: multinode, ubuntu, quantum
         """
         time.sleep(5)
         self.assertFalse(1 == 2)
@@ -41,5 +44,6 @@ class dummy_tests_stopped(unittest.TestCase):
     def test_not_long_at_all(self):
         """You know.. for testing
             Duration: 1sec
+            Deployment tags:
         """
         self.assertTrue(True)

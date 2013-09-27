@@ -14,23 +14,24 @@
 
 import unittest2
 from mock import patch
+
 from fuel_plugin.ostf_adapter.nose_plugin import nose_discovery
-
-
 from fuel_plugin.ostf_adapter.storage import models
 
 
-stopped__profile__ = {
-    "id": "stopped_test",
-    "driver": "nose",
-    "test_path": "fuel_plugin/tests/functional/dummy_tests/stopped_test.py",
-    "description": "Long running 25 secs fake tests"
-}
+#stopped__profile__ = {
+#    "id": "stopped_test",
+#    "driver": "nose",
+#    "test_path": "fuel_plugin/tests/functional/dummy_tests/stopped_test.py",
+#    "description": "Long running 25 secs fake tests",
+#    "deployment tags": ["multinode", "ubuntu"]
+#}
 general__profile__ = {
     "id": "general_test",
     "driver": "nose",
     "test_path": "fuel_plugin/tests/functional/dummy_tests/general_test.py",
-    "description": "General fake tests"
+    "description": "General fake tests",
+    "deployment_tags": ["ha"]
 }
 
 
@@ -38,20 +39,40 @@ general__profile__ = {
 class TestNoseDiscovery(unittest2.TestCase):
 
     def setUp(self):
-        self.fixtures = [models.TestSet(**general__profile__),
-                         models.TestSet(**stopped__profile__)]
+        self.fixtures = [
+            {
+                'cluster_id': 1,
+                'deployment_tags': {
+                    'ha',
+                    'rhel'
+                }
+            },
+            {
+                'cluster_id': 2,
+                'deployment_tags': {
+                    'multinode',
+                    'ubuntu'
+                }
+            },
 
-        self.fixtures_iter = iter(self.fixtures)
+        ]
 
     def test_discovery(self, engine):
-        engine.get_session().merge.side_effect = \
-            lambda *args, **kwargs: self.fixtures_iter.next()
+        expected = {
+            'deployment_tags': ['ha']
+        }
 
         nose_discovery.discovery(
-            path='fuel_plugin/tests/functional/dummy_tests'
+            path='fuel_plugin.tests.functional.dummy_tests.general_test',
+            deployment_info=self.fixtures[0]
         )
 
-        self.assertEqual(engine.get_session().merge.call_count, 2)
+        merge_arg = engine.get_session().merge.call_args[0][0]
+        self.assertTrue(isinstance(merge_arg, models.TestSet))
+        self.assertEqual(
+            merge_arg.deployment_tags,
+            expected['deployment_tags']
+        )
 
     def test_get_proper_description(self, engine):
         '''

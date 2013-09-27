@@ -16,6 +16,7 @@ import requests
 from pecan import conf
 
 from fuel_plugin.ostf_adapter.storage import engine
+from fuel_plugin.ostf_adapter.nose_plugin import nose_discovery
 
 
 def discovery_check(cluster):
@@ -42,7 +43,7 @@ def discovery_check(cluster):
         if not test_set:
             cluster_data = {
                 'cluster_id': cluster,
-                'deployment_args': cluster_deployment_args
+                'deployment_tags': cluster_deployment_args
             }
             nose_discovery.discovery(deployment_info=cluster_data)
 
