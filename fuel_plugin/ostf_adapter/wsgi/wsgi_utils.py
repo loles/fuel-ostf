@@ -20,7 +20,7 @@ from fuel_plugin.ostf_adapter.storage import engine
 
 def discovery_check(cluster):
     nailgun_api_url = 'api/clusters/{}'.format(cluster)
-    cluster_meta = request_to_nailgun(nailgun_api_url)
+    cluster_meta = _request_to_nailgun(nailgun_api_url)
 
     #at this moment we need following deployment
     #arguments for cluster. The main inconvinience

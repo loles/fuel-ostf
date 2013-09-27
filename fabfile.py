@@ -31,8 +31,7 @@ def testdeps():
 
 def startserver():
     local(('ostf-server '
-        '--dbpath postgresql+psycopg2://ostf:ostf@localhost/ostf '
-        '--debug --debug_tests=fuel_plugin/tests/functional/dummy_tests'))
+        '--dbpath postgresql+psycopg2://ostf:ostf@localhost/ostf ')
 
 
 def createmigration(comment):

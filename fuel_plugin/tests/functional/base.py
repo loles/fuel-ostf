@@ -77,6 +77,7 @@ class AdapterClientProxy(object):
         if item in TestingAdapterClient.__dict__:
             call = getattr(self.client, item)
             return self._decorate_call(call)
+
     def _friendly_map(self, mapping):
         Response.set_test_name_mapping(mapping)
 
@@ -86,8 +87,6 @@ class AdapterClientProxy(object):
             r = call(*args, **kwargs)
             return Response(r)
         return inner
-
-
 
 
 class SubsetException(Exception):
@@ -130,5 +129,3 @@ class BaseAdapterTest(TestCase):
         ac = AdapterClientProxy(url)
         ac._friendly_map(mapping)
         return ac
-
-
