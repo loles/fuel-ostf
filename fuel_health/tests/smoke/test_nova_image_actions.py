@@ -38,7 +38,7 @@ class TestImageAction(nmanager.SmokeChecksTest):
     def setUp(self):
         super(TestImageAction, self).setUp()
         if not self.config.compute.compute_nodes:
-            self.fail('There are no compute nodes')
+            self.skipTest('There are no compute nodes')
 
     def _wait_for_server_status(self, server, status):
         self.status_timeout(self.compute_client.servers,

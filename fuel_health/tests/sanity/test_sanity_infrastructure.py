@@ -61,7 +61,7 @@ class SanityInfrastructureTest(nmanager.SanityChecksTest):
         output = u'XXX'
         cmd = 'nova-manage service list'
         if not self.controllers:
-            self.fail('Step 1 failed: there are no controller nodes.')
+            self.skipTest('Step 1 failed: there are no controller nodes.')
         ssh_client = SSHClient(self.controllers[0],
                                self.usr, self.pwd,
                                key_filename=self.key,
@@ -86,7 +86,7 @@ class SanityInfrastructureTest(nmanager.SanityChecksTest):
         Duration: 40 s.
         """
         if not self.computes:
-            self.fail('Step 1 failed: There are no compute nodes')
+            self.skipTest('Step 1 failed: There are no compute nodes')
 
         cmd = "ping 8.8.8.8 -c 1 -w 1"
         ssh_client = SSHClient(self.computes[0],
@@ -114,7 +114,7 @@ class SanityInfrastructureTest(nmanager.SanityChecksTest):
         Duration: 60 s.
         """
         if not self.computes:
-            self.fail('Step 1 failed: There are no compute nodes')
+            self.skipTest('Step 1 failed: There are no compute nodes')
         ssh_client = SSHClient(self.computes[0],
                                self.usr,
                                self.pwd,

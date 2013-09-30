@@ -63,7 +63,7 @@ class TestNovaNetwork(nmanager.NovaNetworkScenarioTest):
     def setUp(self):
         super(TestNovaNetwork, self).setUp()
         if not self.config.compute.compute_nodes:
-            self.fail('There are no compute nodes')
+            self.skipTest('There are no compute nodes')
 
     @classmethod
     def tearDownClass(cls):
