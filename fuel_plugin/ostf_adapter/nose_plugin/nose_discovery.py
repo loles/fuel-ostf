@@ -80,6 +80,13 @@ class DiscoveryPlugin(plugins.Plugin):
                     if set(data['deployment_tags'])\
                        .issubset(self.deployment_info['deployment_tags']):
 
+                        data.update(
+                            {
+                                'test_set_id': test_set_id,
+                                'name': test_id
+                            }
+                        )
+
                         test_obj = models.Test(**data)
                         test_obj = session.merge(test_obj)
                         session.add(test_obj)
