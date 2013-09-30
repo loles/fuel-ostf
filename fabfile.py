@@ -31,7 +31,7 @@ def testdeps():
 
 def startserver():
     local(('ostf-server '
-        '--dbpath postgresql+psycopg2://ostf:ostf@localhost/ostf ')
+        '--dbpath postgresql+psycopg2://ostf:ostf@localhost/ostf '))
 
 
 def createmigration(comment):

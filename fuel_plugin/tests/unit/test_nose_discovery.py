@@ -13,10 +13,12 @@
 #    under the License.
 
 import unittest2
-from mock import patch
+from mock import patch, Mock
+from sqlalchemy.orm import sessionmaker
 
 from fuel_plugin.ostf_adapter.nose_plugin import nose_discovery
 from fuel_plugin.ostf_adapter.storage import models
+from fuel_plugin.ostf_adapter.storage import engine
 
 
 #stopped__profile__ = {
@@ -35,10 +37,45 @@ general__profile__ = {
 }
 
 
-@patch('fuel_plugin.ostf_adapter.nose_plugin.nose_discovery.engine')
 class TestNoseDiscovery(unittest2.TestCase):
+    '''
+    All test writing to database is wrapped in
+    non-ORM transaction which is created in
+    test_case setUp method and rollbacked in
+    tearDown, so that keep prodaction base clean
+    '''
+
+    @classmethod
+    def setUpClass(cls):
+        cls._mocked_pecan_conf = Mock()
+        cls._mocked_pecan_conf.dbpath = \
+            'postgresql+psycopg2://ostf:ostf@localhost/ostf'
+
+        cls.Session = sessionmaker()
+
+        with patch(
+            'fuel_plugin.ostf_adapter.storage.engine.conf',
+            cls._mocked_pecan_conf
+        ):
+            cls.engine = engine.get_engine()
 
     def setUp(self):
+        #database transaction wrapping
+        connection = self.engine.connect()
+        self.trans = connection.begin()
+
+        self.Session.configure(bind=connection)
+        self.session = self.Session(bind=connection)
+
+        #test_case level patching
+        self.mocked_get_session = lambda *args: self.session
+
+        self.session_patcher = patch(
+            'fuel_plugin.ostf_adapter.nose_plugin.nose_discovery.engine.get_session',
+            self.mocked_get_session
+        )
+        self.session_patcher.start()
+
         self.fixtures = [
             {
                 'cluster_id': 1,
@@ -57,8 +94,18 @@ class TestNoseDiscovery(unittest2.TestCase):
 
         ]
 
-    def test_discovery(self, engine):
+    def tearDown(self):
+        #end patching
+        self.session_patcher.stop()
+
+        #unwrapping
+        self.trans.rollback()
+        self.session.close()
+
+    def test_discovery_testsets(self):
         expected = {
+            'id': 'general_test',
+            'cluster_id': 1,
             'deployment_tags': ['ha']
         }
 
@@ -67,12 +114,47 @@ class TestNoseDiscovery(unittest2.TestCase):
             deployment_info=self.fixtures[0]
         )
 
-        merge_arg = engine.get_session().merge.call_args[0][0]
-        self.assertTrue(isinstance(merge_arg, models.TestSet))
+        test_set = self.session.query(models.TestSet)\
+            .filter_by(id=expected['id'])\
+            .filter_by(cluster_id=expected['cluster_id'])\
+            .one()
+
         self.assertEqual(
-            merge_arg.deployment_tags,
+            test_set.deployment_tags,
             expected['deployment_tags']
         )
+
+    def test_discovery_tests(self):
+        expected = {
+            'test_set_id': 'general_test',
+            'cluster_id': 1,
+            'results_count': 2,
+            'results_data': [
+                {
+                    'id': 'fuel_plugin.tests.functional.dummy_tests.general_test.Dummy_test.test_fast_pass',
+                    'deployment_tags': ['ha', 'rhel']
+                },
+                {
+                    'id': 'fuel_plugin.tests.functional.dummy_tests.general_test.Dummy_test.test_fail_with_step',
+                    'deployment_tags': []
+                }
+            ]
+        }
+
+        nose_discovery.discovery(
+            path='fuel_plugin.tests.functional.dummy_tests.general_test',
+            deployment_info=self.fixtures[0]
+        )
+
+        tests = self.session.query(models.Test)\
+            .filter_by(test_set_id=expected['test_set_id'])\
+            .filter_by(cluster_id=expected['cluster_id'])\
+            .all()
+
+        #self.assertTrue(len(tests) == expected['results_count'])
+
+        #for test in tests:
+        #    assertEqual(test.id == expected['results_count'][''])
 
     def test_get_proper_description(self, engine):
         '''

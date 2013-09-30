@@ -74,21 +74,22 @@ def get_description(test_obj):
                 docstring,
                 deployment_tags_pattern
             )
-            deployment_tags = [
-                tag.strip() for tag in deployment_tags.split(',')
-            ]
+
+            #if deployment tags is empty or absent
+            #_process_docstring returns None so we
+            #we must check this and prevent
+            if deployment_tags:
+                deployment_tags = [
+                    tag.strip() for tag in deployment_tags.split(',')
+                ]
+            else:
+                deployment_tags = []
 
             duration_pattern = r'Duration:.?(?P<duration>.+)'
             docstring, duration = _process_docstring(
                 docstring,
                 duration_pattern
             )
-
-            if duration_matcher:
-                duration = duration_matcher.group(1)
-                docstring = docstring[:duration_matcher.start()]
-            else:
-                duration = None
 
             docstring = docstring.split('\n')
             name = docstring.pop(0)
