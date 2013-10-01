@@ -20,7 +20,6 @@ from sqlalchemy.orm import joinedload
 from pecan import rest, expose, request
 
 from fuel_plugin.ostf_adapter.storage import models
-from fuel_plugin.ostf_adapter.nose_plugin import nose_discovery
 from fuel_plugin.ostf_adapter.wsgi.wsgi_utils import discovery_check
 
 

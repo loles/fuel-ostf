@@ -34,6 +34,11 @@ def startserver():
         '--dbpath postgresql+psycopg2://ostf:ostf@localhost/ostf '))
 
 
+def startnailgunmimic():
+    path = 'fuel_plugin/tests/test_utils/nailgun_mimic.py'
+    local('python {}'.format(path))
+
+
 def createmigration(comment):
     '''
     Supply comment for new alembic revision as a value

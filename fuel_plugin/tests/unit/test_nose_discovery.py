@@ -93,7 +93,7 @@ class TestNoseDiscovery(unittest2.TestCase):
         }
 
         nose_discovery.discovery(
-            path='fuel_plugin.tests.functional.deployment_types_tests.ha_deployment_test',
+            path='fuel_plugin.tests.functional.dummy_tests.deployment_types_tests.ha_deployment_test',
             deployment_info=self.fixtures['ha_deployment_test']
         )
 
@@ -114,13 +114,13 @@ class TestNoseDiscovery(unittest2.TestCase):
             'results_count': 2,
             'results_data': {
                 'names': [
-                    'fuel_plugin.tests.functional.deployment_types_tests.ha_deployment_test.HATest.test_ha_rhel_depl',
-                    'fuel_plugin.tests.functional.deployment_types_tests.ha_deployment_test.HATest.test_ha_depl'
+                    'fuel_plugin.tests.functional.dummy_tests.deployment_types_tests.ha_deployment_test.HATest.test_ha_rhel_depl',
+                    'fuel_plugin.tests.functional.dummy_tests.deployment_types_tests.ha_deployment_test.HATest.test_ha_depl'
                 ]
             }
         }
         nose_discovery.discovery(
-            path='fuel_plugin.tests.functional.deployment_types_tests.ha_deployment_test',
+            path='fuel_plugin.tests.functional.dummy_tests.deployment_types_tests.ha_deployment_test',
             deployment_info=self.fixtures['ha_deployment_test']
         )
 
@@ -142,7 +142,7 @@ class TestNoseDiscovery(unittest2.TestCase):
         expected = {
             'title': 'fake empty test',
             'name':
-                'fuel_plugin.tests.functional.deployment_types_tests.ha_deployment_test.HATest.test_ha_rhel_depl',
+                'fuel_plugin.tests.functional.dummy_tests.deployment_types_tests.ha_deployment_test.HATest.test_ha_rhel_depl',
             'duration': '0sec',
             'test_set_id': 'ha_deployment_test',
             'cluster_id': self.fixtures['ha_deployment_test']['cluster_id'],
@@ -151,7 +151,7 @@ class TestNoseDiscovery(unittest2.TestCase):
         }
 
         nose_discovery.discovery(
-            path='fuel_plugin.tests.functional.deployment_types_tests.ha_deployment_test',
+            path='fuel_plugin.tests.functional.dummy_tests.deployment_types_tests.ha_deployment_test',
             deployment_info=self.fixtures['ha_deployment_test']
         )
 

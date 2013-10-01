@@ -15,7 +15,7 @@
 import requests
 from pecan import conf
 
-from fuel_plugin.ostf_adapter.storage import engine
+from fuel_plugin.ostf_adapter.storage import engine, models
 from fuel_plugin.ostf_adapter.nose_plugin import nose_discovery
 
 
@@ -36,7 +36,7 @@ def discovery_check(cluster):
 
     session = engine.get_session()
     with session.begin(subtransactions=True):
-        test_set = request.session.query(TestSet)\
+        test_set = session.query(models.TestSet)\
             .filter_by(cluster_id=cluster)\
             .first()
 

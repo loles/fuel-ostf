@@ -37,7 +37,11 @@ def main():
         },
         'dbpath': cli_args.dbpath,
         'debug': cli_args.debug,
-        'debug_tests': cli_args.debug_tests
+        'debug_tests': cli_args.debug_tests,
+        'nailgun': {
+            'host': cli_args.nailgun_host,
+            'port': cli_args.nailgun_port
+        }
     }
 
     logger.setup(log_file=cli_args.log_file)
