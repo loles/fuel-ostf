@@ -61,14 +61,14 @@ class TestNoseDiscovery(unittest2.TestCase):
         self.session_patcher.start()
 
         self.fixtures = {
-            'general_test': {
+            'ha_deployment_test': {
                 'cluster_id': 1,
                 'deployment_tags': {
                     'ha',
                     'rhel'
                 }
             },
-            'stopped_test': {
+            'multinode_deployment_test': {
                 'cluster_id': 2,
                 'deployment_tags': {
                     'multinode',
@@ -87,14 +87,14 @@ class TestNoseDiscovery(unittest2.TestCase):
 
     def test_discovery_testsets(self):
         expected = {
-            'id': 'general_test',
+            'id': 'ha_deployment_test',
             'cluster_id': 1,
             'deployment_tags': ['ha']
         }
 
         nose_discovery.discovery(
-            path='fuel_plugin.tests.functional.dummy_tests.general_test',
-            deployment_info=self.fixtures['general_test']
+            path='fuel_plugin.tests.functional.deployment_types_tests.ha_deployment_test',
+            deployment_info=self.fixtures['ha_deployment_test']
         )
 
         test_set = self.session.query(models.TestSet)\
@@ -109,19 +109,19 @@ class TestNoseDiscovery(unittest2.TestCase):
 
     def test_discovery_tests(self):
         expected = {
-            'test_set_id': 'general_test',
+            'test_set_id': 'ha_deployment_test',
             'cluster_id': 1,
             'results_count': 2,
             'results_data': {
                 'names': [
-                    'fuel_plugin.tests.functional.dummy_tests.general_test.Dummy_test.test_fast_pass',
-                    'fuel_plugin.tests.functional.dummy_tests.general_test.Dummy_test.test_fail_with_step'
+                    'fuel_plugin.tests.functional.deployment_types_tests.ha_deployment_test.HATest.test_ha_rhel_depl',
+                    'fuel_plugin.tests.functional.deployment_types_tests.ha_deployment_test.HATest.test_ha_depl'
                 ]
             }
         }
         nose_discovery.discovery(
-            path='fuel_plugin.tests.functional.dummy_tests.general_test',
-            deployment_info=self.fixtures['general_test']
+            path='fuel_plugin.tests.functional.deployment_types_tests.ha_deployment_test',
+            deployment_info=self.fixtures['ha_deployment_test']
         )
 
         tests = self.session.query(models.Test)\
@@ -135,26 +135,24 @@ class TestNoseDiscovery(unittest2.TestCase):
             self.assertTrue(test.name in expected['results_data']['names'])
             self.assertTrue(
                 set(test.deployment_tags)
-                .issubset(self.fixtures['general_test']['deployment_tags'])
+                .issubset(self.fixtures['ha_deployment_test']['deployment_tags'])
             )
 
     def test_get_proper_description(self):
         expected = {
-            'title': 'fast pass test',
+            'title': 'fake empty test',
             'name':
-                'fuel_plugin.tests.functional.dummy_tests.general_test.Dummy_test.test_fast_pass',
-            'duration': '1sec',
-            'description':
-                '        This is a simple always pass test\n        ',
-            'test_set_id': 'general_test',
-            'cluster_id': self.fixtures['general_test']['cluster_id'],
+                'fuel_plugin.tests.functional.deployment_types_tests.ha_deployment_test.HATest.test_ha_rhel_depl',
+            'duration': '0sec',
+            'test_set_id': 'ha_deployment_test',
+            'cluster_id': self.fixtures['ha_deployment_test']['cluster_id'],
             'deployment_tags': ['ha', 'rhel']
 
         }
 
         nose_discovery.discovery(
-            path='fuel_plugin.tests.functional.dummy_tests.general_test',
-            deployment_info=self.fixtures['general_test']
+            path='fuel_plugin.tests.functional.deployment_types_tests.ha_deployment_test',
+            deployment_info=self.fixtures['ha_deployment_test']
         )
 
         test = self.session.query(models.Test)\

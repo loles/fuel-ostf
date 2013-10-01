@@ -17,7 +17,7 @@ __profile__ = {
     "driver": "nose",
     "test_path": "fuel_plugin/tests/functional/dummy_tests/general_test.py",
     "description": "General fake tests",
-    "deployment_tags": ["ha"]
+    "deployment_tags": []
 }
 
 import time
@@ -33,7 +33,7 @@ class Dummy_test(unittest.TestCase):
         """fast pass test
         This is a simple always pass test
         Duration: 1sec
-        Deployment tags: ha, rhel
+        Deployment tags:
         """
         self.assertTrue(True)
 
@@ -42,20 +42,20 @@ class Dummy_test(unittest.TestCase):
         This is a simple test
         it will run for 5 sec
         Duration: 5sec
-        Deployment tags: ha, rhel, quantum
+        Deployment tags:
         """
         time.sleep(5)
         self.assertTrue(True)
 
     def test_fast_fail(self):
         """Fast fail
-        Deployment tags: ha, ubuntu
+        Deployment tags:
         """
         self.assertTrue(False, msg='Something goes wroooong')
 
     def test_fast_error(self):
         """And fast error
-        Deployment tags: ha, ubuntu, nova_network
+        Deployment tags:
         """
         conn = httplib.HTTPSConnection('random.random/random')
         conn.request("GET", "/random.aspx")
