@@ -26,13 +26,7 @@ import novaclient.client
 
 import time
 
-try:
-
-    from quantumclient.common import exceptions as exc
-    import quantumclient.v2_0.client
-
-except ImportError:
-    pass
+import quantumclient.v2_0.client
 
 from fuel_health.common.ssh import Client as SSHClient
 from fuel_health.exceptions import SSHExecCommandFailed
@@ -161,14 +155,11 @@ class OfficialClientManager(fuel_health.manager.Manager):
 
         auth_url = self.config.identity.uri
         dscv = self.config.identity.disable_ssl_certificate_validation
-        try:
-            return quantumclient.v2_0.client.Client(username=username,
-                                                    password=password,
-                                                    tenant_name=tenant_name,
-                                                    auth_url=auth_url,
-                                                    insecure=dscv)
-        except BaseException:
-            return
+        return quantumclient.v2_0.client.Client(username=username,
+                                                password=password,
+                                                tenant_name=tenant_name,
+                                                auth_url=auth_url,
+                                                insecure=dscv)
 
 
 class OfficialClientTest(fuel_health.test.TestCase):
