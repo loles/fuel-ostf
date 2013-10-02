@@ -13,12 +13,9 @@
 #    under the License.
 
 import time
-import mock
 
 from fuel_plugin.tests.functional.base import BaseAdapterTest, Response
 from fuel_plugin.ostf_client.client import TestingAdapterClient as adapter
-
-from fuel_plugin.ostf_adapter.storage import engine, models
 
 
 class AdapterTests(BaseAdapterTest):
