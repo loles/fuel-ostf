@@ -541,9 +541,7 @@ class NailgunConfig(object):
         conntroller_names = []
         public_ips = []
         for node in controller_nodes:
-            public_network = next(network for network in node['network_data']
-                                  if network['name'] == 'public')
-            ip = public_network['ip'].split('/')[0]
+	    ip = node['ip']
             public_ips.append(ip)
             controller_ips.append(node['ip'])
             conntroller_names.append(node['fqdn'])
