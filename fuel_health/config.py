@@ -606,21 +606,18 @@ class NailgunConfig(object):
     def set_endpoints(self):
         public_vip = self.network.raw_data.get('public_vip', None)
         # workaround for api without public_vip for ha mode
-        if not public_vip and 'ha' in self.mode:
-            self._parse_ostf_api()
-        else:
-            endpoint = public_vip or self.compute.public_ips[0]
-            endpoint_mur_sav = public_vip or self.compute.controller_nodes[0]
-            self.identity.url = 'http://{0}/{1}/'.format(endpoint, 'dashboard')
-            self.identity.ubuntu_url = 'http://{0}/'.format(endpoint)
-            self.identity.uri = 'http://{0}:{1}/{2}/'.format(
-                endpoint, 5000, 'v2.0')
-            self.murano.api_url = 'http://{0}:{1}'.format(
-                endpoint_mur_sav, 8082)
-            self.savanna.api_url = 'http://{0}:{1}/{2}'.format(
-                endpoint_mur_sav, 8386, 'v1.0')
-            self.heat.endpoint = 'http://{0}:{1}/{2}'.format(
-                endpoint_mur_sav, 8004, 'v1')
+        endpoint = public_vip or self.compute.public_ips[0]
+        endpoint_mur_sav = public_vip or self.compute.controller_nodes[0]
+        self.identity.url = 'http://{0}/{1}/'.format(endpoint, 'dashboard')
+        self.identity.ubuntu_url = 'http://{0}/'.format(endpoint)
+        self.identity.uri = 'http://{0}:{1}/{2}/'.format(
+            endpoint, 5000, 'v2.0')
+        self.murano.api_url = 'http://{0}:{1}'.format(
+            endpoint_mur_sav, 8082)
+        self.savanna.api_url = 'http://{0}:{1}/{2}'.format(
+            endpoint_mur_sav, 8386, 'v1.0')
+        self.heat.endpoint = 'http://{0}:{1}/{2}'.format(
+            endpoint_mur_sav, 8004, 'v1')
 
 
 def FuelConfig():
